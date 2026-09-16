@@ -215,6 +215,28 @@ function Index() {
     }
   }, [hydrated, mode, category, prepSeconds, speakSeconds, recordEnabled, history]);
 
+const INITIAL_COOL_WORDS = [
+  "Cakrawala",
+  "Resonansi",
+  "Perspektif",
+  "Eksplorasi",
+  "Paradoks",
+  "Sinergi",
+  "Inovasi",
+  "Wawasan",
+  "Inspirasi",
+  "Dinamika",
+  "Kreativitas",
+  "Visi",
+  "Manifesto",
+  "Refleksi",
+  "Spektrum",
+];
+
+function pickCoolWord(): string {
+  return INITIAL_COOL_WORDS[Math.floor(Math.random() * INITIAL_COOL_WORDS.length)];
+}
+
 const SPINNER_POOL = [
   "Eksplorasi",
   "Gagasan",
@@ -230,10 +252,10 @@ const SPINNER_POOL = [
   "Visi",
 ];
 
-  // Tampilkan petunjuk awal saat halaman pertama dibuka
+  // Tampilkan kata keren acak saat halaman pertama dibuka
   useEffect(() => {
     if (hydrated && topic === null && stage === "idle") {
-      setTopic("Tekan tombol 'Putar' untuk topik AI ✨");
+      setTopic(pickCoolWord());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
@@ -352,7 +374,7 @@ const SPINNER_POOL = [
                 setMode(m.id);
                 usedRef.current.clear();
                 resetRound();
-                setTopic("Tekan 'Putar' untuk topik AI ✨");
+                setTopic(pickCoolWord());
                 setPrepSeconds(m.id === "research" ? 600 : 30);
                 setSpeakSeconds(m.id === "research" ? 120 : 60);
               }}
@@ -386,7 +408,7 @@ const SPINNER_POOL = [
                   setCategory(c);
                   usedRef.current.clear();
                   if (stage === "idle" && !isLoading) {
-                    setTopic("Tekan 'Putar' untuk topik AI ✨");
+                    setTopic(pickCoolWord());
                   }
                 }}
               />

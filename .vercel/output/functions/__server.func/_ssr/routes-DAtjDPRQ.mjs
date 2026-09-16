@@ -2,7 +2,7 @@ import { r as __toESM } from "../_runtime.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-DdMxuqwx.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-BlAfohfd.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-DAtjDPRQ.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var CATEGORIES = [
@@ -719,6 +719,26 @@ function Index() {
 		recordEnabled,
 		history
 	]);
+	const INITIAL_COOL_WORDS = [
+		"Cakrawala",
+		"Resonansi",
+		"Perspektif",
+		"Eksplorasi",
+		"Paradoks",
+		"Sinergi",
+		"Inovasi",
+		"Wawasan",
+		"Inspirasi",
+		"Dinamika",
+		"Kreativitas",
+		"Visi",
+		"Manifesto",
+		"Refleksi",
+		"Spektrum"
+	];
+	function pickCoolWord() {
+		return INITIAL_COOL_WORDS[Math.floor(Math.random() * INITIAL_COOL_WORDS.length)];
+	}
 	const SPINNER_POOL = [
 		"Eksplorasi",
 		"Gagasan",
@@ -734,7 +754,7 @@ function Index() {
 		"Visi"
 	];
 	(0, import_react.useEffect)(() => {
-		if (hydrated && topic === null && stage === "idle") setTopic("Tekan tombol 'Putar' untuk topik AI ✨");
+		if (hydrated && topic === null && stage === "idle") setTopic(pickCoolWord());
 	}, [hydrated]);
 	async function fetchTopic(overrideMode, overrideCategory) {
 		try {
@@ -826,7 +846,7 @@ function Index() {
 								setMode(m.id);
 								usedRef.current.clear();
 								resetRound();
-								setTopic("Tekan 'Putar' untuk topik AI ✨");
+								setTopic(pickCoolWord());
 								setPrepSeconds(m.id === "research" ? 600 : 30);
 								setSpeakSeconds(m.id === "research" ? 120 : 60);
 							},
@@ -856,7 +876,7 @@ function Index() {
 							onChange: (c) => {
 								setCategory(c);
 								usedRef.current.clear();
-								if (stage === "idle" && !isLoading) setTopic("Tekan 'Putar' untuk topik AI ✨");
+								if (stage === "idle" && !isLoading) setTopic(pickCoolWord());
 							}
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex w-full flex-col gap-4 sm:flex-row sm:justify-center",
