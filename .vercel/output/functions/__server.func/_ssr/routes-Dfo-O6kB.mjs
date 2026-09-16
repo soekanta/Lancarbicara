@@ -2,7 +2,7 @@ import { r as __toESM } from "../_runtime.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-Cq8nDew5.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-qJRfBqCw.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-Dfo-O6kB.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var CATEGORIES = [
@@ -713,13 +713,6 @@ function playWatchTick(progress) {
 		setTimeout(() => void ctx.close(), 100);
 	} catch {}
 }
-/**
-* Animasi gulir vertikal ala mesin slot.
-*
-* Menampilkan 3 baris: atas (opacity 20%, blur), tengah (terang, besar), bawah (opacity 20%, blur).
-* Spin mulai cepat lalu melambat secara alami (easing deceleration).
-* Setelah finalTopic diterima, melambat dan berhenti halus tepat di kata tersebut.
-*/
 function SlotSpinner({ pool, finalTopic, onComplete }) {
 	const containerRef = (0, import_react.useRef)(null);
 	const rafRef = (0, import_react.useRef)(0);
@@ -735,6 +728,15 @@ function SlotSpinner({ pool, finalTopic, onComplete }) {
 	const deceleratingRef = (0, import_react.useRef)(false);
 	const currentIntervalRef = (0, import_react.useRef)(80);
 	const completedRef = (0, import_react.useRef)(false);
+	const finalTopicRef = (0, import_react.useRef)(finalTopic);
+	const onCompleteRef = (0, import_react.useRef)(onComplete);
+	(0, import_react.useEffect)(() => {
+		onCompleteRef.current = onComplete;
+	}, [onComplete]);
+	(0, import_react.useEffect)(() => {
+		finalTopicRef.current = finalTopic;
+		if (finalTopic) finalReceivedRef.current = true;
+	}, [finalTopic]);
 	const shuffledPool = (0, import_react.useRef)([]);
 	(0, import_react.useEffect)(() => {
 		const arr = [...pool];
@@ -750,47 +752,45 @@ function SlotSpinner({ pool, finalTopic, onComplete }) {
 		return p[(idx % p.length + p.length) % p.length];
 	}, []);
 	(0, import_react.useEffect)(() => {
-		if (finalTopic) finalReceivedRef.current = true;
-	}, [finalTopic]);
-	(0, import_react.useEffect)(() => {
 		startTimeRef.current = performance.now();
 		lastTickTimeRef.current = performance.now();
-		indexRef.current = Math.floor(Math.random() * pool.length);
+		indexRef.current = Math.floor(Math.random() * Math.max(1, pool.length));
 		completedRef.current = false;
 		finalReceivedRef.current = !!finalTopic;
 		deceleratingRef.current = false;
 		currentIntervalRef.current = 80;
-		const idx = indexRef.current;
+		const initialIdx = indexRef.current;
 		setVisibleItems([
-			getItem(idx - 1),
-			getItem(idx),
-			getItem(idx + 1)
+			getItem(initialIdx - 1),
+			getItem(initialIdx),
+			getItem(initialIdx + 1)
 		]);
 		const animate = () => {
 			const now = performance.now();
 			const elapsed = now - startTimeRef.current;
-			if (finalReceivedRef.current && elapsed > 1200 && !deceleratingRef.current) deceleratingRef.current = true;
-			if (deceleratingRef.current) currentIntervalRef.current = Math.min(currentIntervalRef.current * 1.12, 500);
+			if (finalReceivedRef.current && elapsed > 1e3 && !deceleratingRef.current) deceleratingRef.current = true;
+			if (deceleratingRef.current) currentIntervalRef.current = Math.min(currentIntervalRef.current * 1.14, 500);
 			else {
-				const normalProgress = Math.min(elapsed / 1200, 1);
+				const normalProgress = Math.min(elapsed / 1e3, 1);
 				currentIntervalRef.current = 80 + normalProgress * 40;
 			}
 			if (now - lastTickTimeRef.current >= currentIntervalRef.current) {
 				lastTickTimeRef.current = now;
 				indexRef.current += 1;
-				const progress = Math.min(elapsed / 3e3, 1);
-				if (deceleratingRef.current && currentIntervalRef.current >= 450 && finalTopic && !completedRef.current) {
+				const targetFinal = finalTopicRef.current;
+				const progress = Math.min(elapsed / 2500, 1);
+				if (deceleratingRef.current && currentIntervalRef.current >= 380 && targetFinal && !completedRef.current) {
 					completedRef.current = true;
 					const lastPoolItem = getItem(indexRef.current - 1);
 					setVisibleItems([
 						lastPoolItem,
-						finalTopic,
-						""
+						targetFinal,
+						getItem(indexRef.current + 1)
 					]);
 					playWatchTick(1);
 					setTimeout(() => {
-						onComplete();
-					}, 600);
+						onCompleteRef.current();
+					}, 500);
 					return;
 				}
 				const idx = indexRef.current;
@@ -807,12 +807,12 @@ function SlotSpinner({ pool, finalTopic, onComplete }) {
 		return () => {
 			if (rafRef.current) cancelAnimationFrame(rafRef.current);
 		};
-	}, []);
+	}, [getItem, pool.length]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		ref: containerRef,
 		className: "slot-container",
 		"aria-busy": "true",
-		"aria-label": "Memilih topik\\u2026",
+		"aria-label": "Memilih topik…",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "slot-track",
@@ -1059,24 +1059,26 @@ function Index() {
 	(0, import_react.useEffect)(() => {
 		if (hydrated && topic === null && stage === "idle") setTopic(pickLocal());
 	}, [hydrated]);
-	function localPool() {
-		return mode === "research" ? RESEARCH_TOPICS : IMPROMPTU_TOPICS[category];
+	function localPool(overrideMode, overrideCategory) {
+		return (overrideMode ?? mode) === "research" ? RESEARCH_TOPICS : IMPROMPTU_TOPICS[overrideCategory ?? category];
 	}
-	function pickLocal() {
-		const pool = localPool();
+	function pickLocal(overrideMode, overrideCategory) {
+		const pool = localPool(overrideMode, overrideCategory);
 		const fresh = pool.filter((t) => !usedRef.current.has(t));
 		const list = fresh.length > 0 ? fresh : (usedRef.current.clear(), pool);
 		const picked = list[Math.floor(Math.random() * list.length)];
 		usedRef.current.add(picked);
 		return picked;
 	}
-	async function fetchTopic() {
+	async function fetchTopic(overrideMode, overrideCategory) {
 		try {
-			const data = await generateTopic({ data: { cat: mode === "research" ? "riset" : category } });
+			const m = overrideMode ?? mode;
+			const c = overrideCategory ?? category;
+			const data = await generateTopic({ data: { cat: m === "research" ? "riset" : c } });
 			if (data && data.status === "success" && data.topic && data.topic.trim()) return data.topic;
-			return pickLocal();
+			return pickLocal(m, c);
 		} catch {
-			return pickLocal();
+			return pickLocal(overrideMode, overrideCategory);
 		}
 	}
 	function resetRound() {
@@ -1084,13 +1086,21 @@ function Index() {
 		recorder.stop();
 		recorder.clear();
 		setStage("idle");
+		setIsLoading(false);
+		setSpinResult(null);
 	}
 	async function drawTopic() {
 		setIsLoading(true);
 		setSpinResult(null);
 		timer.stop();
 		recorder.clear();
-		fetchTopic().then((t) => {
+		const currentM = mode;
+		const currentC = category;
+		const timerId = setTimeout(() => {
+			setSpinResult((curr) => curr ?? pickLocal(currentM, currentC));
+		}, 3500);
+		fetchTopic(currentM, currentC).then((t) => {
+			clearTimeout(timerId);
 			setSpinResult(t);
 		});
 	}
@@ -1113,7 +1123,13 @@ function Index() {
 		setIsLoading(true);
 		setSpinResult(null);
 		timer.stop();
-		fetchTopic().then((t) => {
+		const currentM = mode;
+		const currentC = category;
+		const timerId = setTimeout(() => {
+			setSpinResult((curr) => curr ?? pickLocal(currentM, currentC));
+		}, 3500);
+		fetchTopic(currentM, currentC).then((t) => {
+			clearTimeout(timerId);
 			setSpinResult(t);
 		});
 	}
@@ -1156,8 +1172,8 @@ function Index() {
 								if (m.id === mode) return;
 								setMode(m.id);
 								usedRef.current.clear();
-								setTopic(null);
 								resetRound();
+								setTopic(pickLocal(m.id, category));
 								setPrepSeconds(m.id === "research" ? 600 : 30);
 								setSpeakSeconds(m.id === "research" ? 120 : 60);
 							},

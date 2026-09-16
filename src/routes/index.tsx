@@ -225,12 +225,14 @@ function Index() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
 
-  function localPool(): string[] {
-    return mode === "research" ? RESEARCH_TOPICS : IMPROMPTU_TOPICS[category];
+  function localPool(overrideMode?: Mode, overrideCategory?: Category): string[] {
+    const m = overrideMode ?? mode;
+    const c = overrideCategory ?? category;
+    return m === "research" ? RESEARCH_TOPICS : IMPROMPTU_TOPICS[c];
   }
 
-  function pickLocal(): string {
-    const pool = localPool();
+  function pickLocal(overrideMode?: Mode, overrideCategory?: Category): string {
+    const pool = localPool(overrideMode, overrideCategory);
     const fresh = pool.filter((t) => !usedRef.current.has(t));
     const list = fresh.length > 0 ? fresh : (usedRef.current.clear(), pool);
     const picked = list[Math.floor(Math.random() * list.length)]!;
@@ -238,16 +240,18 @@ function Index() {
     return picked;
   }
 
-  async function fetchTopic(): Promise<string> {
+  async function fetchTopic(overrideMode?: Mode, overrideCategory?: Category): Promise<string> {
     try {
-      const query = mode === "research" ? "riset" : category;
+      const m = overrideMode ?? mode;
+      const c = overrideCategory ?? category;
+      const query = m === "research" ? "riset" : c;
       const data = await generateTopic({ data: { cat: query } });
       if (data && data.status === "success" && data.topic && data.topic.trim()) {
         return data.topic;
       }
-      return pickLocal();
+      return pickLocal(m, c);
     } catch {
-      return pickLocal();
+      return pickLocal(overrideMode, overrideCategory);
     }
   }
 
@@ -256,6 +260,8 @@ function Index() {
     recorder.stop();
     recorder.clear();
     setStage("idle");
+    setIsLoading(false);
+    setSpinResult(null);
   }
 
   async function drawTopic() {
@@ -264,8 +270,16 @@ function Index() {
     timer.stop();
     recorder.clear();
 
-    // Mulai fetch di background; SlotSpinner akan menerima hasil lewat spinResult
-    fetchTopic().then((t) => {
+    const currentM = mode;
+    const currentC = category;
+
+    // Safety fallback: jika API terlalu lama (> 3.5s), pakai topik lokal agar spin pasti berhenti
+    const timerId = setTimeout(() => {
+      setSpinResult((curr) => curr ?? pickLocal(currentM, currentC));
+    }, 3500);
+
+    fetchTopic(currentM, currentC).then((t) => {
+      clearTimeout(timerId);
       setSpinResult(t);
     });
   }
@@ -294,7 +308,15 @@ function Index() {
     setSpinResult(null);
     timer.stop();
 
-    fetchTopic().then((t) => {
+    const currentM = mode;
+    const currentC = category;
+
+    const timerId = setTimeout(() => {
+      setSpinResult((curr) => curr ?? pickLocal(currentM, currentC));
+    }, 3500);
+
+    fetchTopic(currentM, currentC).then((t) => {
+      clearTimeout(timerId);
       setSpinResult(t);
     });
   }
@@ -337,8 +359,8 @@ function Index() {
                 if (m.id === mode) return;
                 setMode(m.id);
                 usedRef.current.clear();
-                setTopic(null);
                 resetRound();
+                setTopic(pickLocal(m.id, category));
                 setPrepSeconds(m.id === "research" ? 600 : 30);
                 setSpeakSeconds(m.id === "research" ? 120 : 60);
               }}

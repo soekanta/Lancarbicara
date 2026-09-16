@@ -10,17 +10,14 @@ function playWatchTick(progress: number) {
     const ctx = new Ctx();
     const t = ctx.currentTime;
 
-    // Impulse sangat pendek — mensimulasikan "klik" gear mekanis
     const sampleRate = ctx.sampleRate;
-    const duration = 0.008; // 8ms — sangat pendek dan tajam
+    const duration = 0.008; // 8ms
     const bufferSize = Math.floor(sampleRate * duration);
     const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
     const data = buffer.getChannelData(0);
 
-    // Bentuk gelombang: ledakan tajam lalu decay eksponensial cepat
     for (let i = 0; i < bufferSize; i++) {
-      const env = Math.exp(-i / (bufferSize * 0.08)); // decay sangat cepat
-      // Campuran nada tinggi + sedikit noise untuk karakter metalik
+      const env = Math.exp(-i / (bufferSize * 0.08));
       data[i] = env * (
         Math.sin(2 * Math.PI * 3200 * i / sampleRate) * 0.7 +
         Math.sin(2 * Math.PI * 6400 * i / sampleRate) * 0.2 +
@@ -31,13 +28,11 @@ function playWatchTick(progress: number) {
     const source = ctx.createBufferSource();
     source.buffer = buffer;
 
-    // Highpass filter — hanya loloskan frekuensi tinggi untuk kesan metalik
     const hp = ctx.createBiquadFilter();
     hp.type = "highpass";
     hp.frequency.value = 2000 + progress * 2000;
     hp.Q.value = 1.5;
 
-    // Volume sedikit naik seiring progress
     const gain = ctx.createGain();
     const vol = 0.12 + progress * 0.18;
     gain.gain.setValueAtTime(vol, t);
@@ -62,24 +57,32 @@ interface SlotSpinnerProps {
   onComplete: () => void;
 }
 
-/**
- * Animasi gulir vertikal ala mesin slot.
- *
- * Menampilkan 3 baris: atas (opacity 20%, blur), tengah (terang, besar), bawah (opacity 20%, blur).
- * Spin mulai cepat lalu melambat secara alami (easing deceleration).
- * Setelah finalTopic diterima, melambat dan berhenti halus tepat di kata tersebut.
- */
 export function SlotSpinner({ pool, finalTopic, onComplete }: SlotSpinnerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const [visibleItems, setVisibleItems] = useState<string[]>(["", "", ""]);
+  
   const indexRef = useRef(0);
   const startTimeRef = useRef(0);
   const lastTickTimeRef = useRef(0);
   const finalReceivedRef = useRef(false);
   const deceleratingRef = useRef(false);
-  const currentIntervalRef = useRef(80); // ms antara setiap pergantian kata
+  const currentIntervalRef = useRef(80);
   const completedRef = useRef(false);
+
+  const finalTopicRef = useRef<string | null>(finalTopic);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  useEffect(() => {
+    finalTopicRef.current = finalTopic;
+    if (finalTopic) {
+      finalReceivedRef.current = true;
+    }
+  }, [finalTopic]);
 
   // Shuffle pool untuk variasi
   const shuffledPool = useRef<string[]>([]);
@@ -98,44 +101,33 @@ export function SlotSpinner({ pool, finalTopic, onComplete }: SlotSpinnerProps) 
     return p[((idx % p.length) + p.length) % p.length];
   }, []);
 
-  // Track finalTopic
-  useEffect(() => {
-    if (finalTopic) {
-      finalReceivedRef.current = true;
-    }
-  }, [finalTopic]);
-
   useEffect(() => {
     startTimeRef.current = performance.now();
     lastTickTimeRef.current = performance.now();
-    indexRef.current = Math.floor(Math.random() * pool.length);
+    indexRef.current = Math.floor(Math.random() * Math.max(1, pool.length));
     completedRef.current = false;
     finalReceivedRef.current = !!finalTopic;
     deceleratingRef.current = false;
     currentIntervalRef.current = 80;
 
-    // Set initial display
-    const idx = indexRef.current;
-    setVisibleItems([getItem(idx - 1), getItem(idx), getItem(idx + 1)]);
+    const initialIdx = indexRef.current;
+    setVisibleItems([getItem(initialIdx - 1), getItem(initialIdx), getItem(initialIdx + 1)]);
 
     const animate = () => {
       const now = performance.now();
       const elapsed = now - startTimeRef.current;
 
-      // Fase 1: Spin normal (pertama ~1.2 detik, atau sampai final diterima)
-      // Fase 2: Deceleration (setelah final diterima, melambat secara alami)
-      // Fase 3: Reveal (berhenti di finalTopic)
-
-      if (finalReceivedRef.current && elapsed > 1200 && !deceleratingRef.current) {
+      // Mulai perlambatan setelah 1 detik DAN finalTopic sudah tersedia
+      if (finalReceivedRef.current && elapsed > 1000 && !deceleratingRef.current) {
         deceleratingRef.current = true;
       }
 
       if (deceleratingRef.current) {
-        // Melambat: interval bertambah setiap tick
-        currentIntervalRef.current = Math.min(currentIntervalRef.current * 1.12, 500);
+        // Melambat: interval antar-kata makin panjang
+        currentIntervalRef.current = Math.min(currentIntervalRef.current * 1.14, 500);
       } else {
-        // Saat spin normal, sedikit melambat natural seiring waktu
-        const normalProgress = Math.min(elapsed / 1200, 1);
+        // Spin biasa: sedikit melambat secara gradual
+        const normalProgress = Math.min(elapsed / 1000, 1);
         currentIntervalRef.current = 80 + normalProgress * 40;
       }
 
@@ -143,20 +135,19 @@ export function SlotSpinner({ pool, finalTopic, onComplete }: SlotSpinnerProps) 
         lastTickTimeRef.current = now;
         indexRef.current += 1;
 
-        const progress = Math.min(elapsed / 3000, 1);
+        const targetFinal = finalTopicRef.current;
+        const progress = Math.min(elapsed / 2500, 1);
 
-        // Cek apakah saatnya berhenti
-        if (deceleratingRef.current && currentIntervalRef.current >= 450 && finalTopic && !completedRef.current) {
-          // Fase terakhir: tampilkan finalTopic di tengah dengan transisi
+        // Cek kondisi berhenti: sudah melambat (interval >= 380ms) & finalTopic sudah ada
+        if (deceleratingRef.current && currentIntervalRef.current >= 380 && targetFinal && !completedRef.current) {
           completedRef.current = true;
           const lastPoolItem = getItem(indexRef.current - 1);
-          setVisibleItems([lastPoolItem, finalTopic, ""]);
+          setVisibleItems([lastPoolItem, targetFinal, getItem(indexRef.current + 1)]);
           playWatchTick(1);
 
-          // Jeda sebentar lalu panggil onComplete
           setTimeout(() => {
-            onComplete();
-          }, 600);
+            onCompleteRef.current();
+          }, 500);
           return;
         }
 
@@ -173,32 +164,27 @@ export function SlotSpinner({ pool, finalTopic, onComplete }: SlotSpinnerProps) 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getItem, pool.length]);
 
   return (
     <div
       ref={containerRef}
       className="slot-container"
       aria-busy="true"
-      aria-label="Memilih topik\u2026"
+      aria-label="Memilih topik…"
     >
       <div className="slot-track">
-        {/* Baris atas — opacity rendah, blur */}
         <div className="slot-item slot-item-ghost">
           {visibleItems[0]}
         </div>
-        {/* Baris tengah — utama */}
         <div className="slot-item slot-item-active">
           {visibleItems[1]}
         </div>
-        {/* Baris bawah — opacity rendah, blur */}
         <div className="slot-item slot-item-ghost">
           {visibleItems[2]}
         </div>
       </div>
 
-      {/* Gradient masks atas-bawah */}
       <div className="slot-mask-top" />
       <div className="slot-mask-bottom" />
     </div>
