@@ -2,8 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CATEGORIES,
-  IMPROMPTU_TOPICS,
-  RESEARCH_TOPICS,
   type Category,
 } from "@/data/topics";
 const VALID_CATEGORIES = new Set<string>(CATEGORIES.map((c) => c.id));
