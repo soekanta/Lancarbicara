@@ -217,28 +217,28 @@ function Index() {
     }
   }, [hydrated, mode, category, prepSeconds, speakSeconds, recordEnabled, history]);
 
-  // Tampilkan langsung satu topik saat halaman dibuka
+const SPINNER_POOL = [
+  "Eksplorasi",
+  "Gagasan",
+  "Perspektif",
+  "Strategi",
+  "Wawasan",
+  "Inovasi",
+  "Dinamika",
+  "Konsep",
+  "Teori",
+  "Analisis",
+  "Refleksi",
+  "Visi",
+];
+
+  // Tampilkan petunjuk awal saat halaman pertama dibuka
   useEffect(() => {
     if (hydrated && topic === null && stage === "idle") {
-      setTopic(pickLocal());
+      setTopic("Tekan tombol 'Putar' untuk topik AI ✨");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
-
-  function localPool(overrideMode?: Mode, overrideCategory?: Category): string[] {
-    const m = overrideMode ?? mode;
-    const c = overrideCategory ?? category;
-    return m === "research" ? RESEARCH_TOPICS : IMPROMPTU_TOPICS[c];
-  }
-
-  function pickLocal(overrideMode?: Mode, overrideCategory?: Category): string {
-    const pool = localPool(overrideMode, overrideCategory);
-    const fresh = pool.filter((t) => !usedRef.current.has(t));
-    const list = fresh.length > 0 ? fresh : (usedRef.current.clear(), pool);
-    const picked = list[Math.floor(Math.random() * list.length)]!;
-    usedRef.current.add(picked);
-    return picked;
-  }
 
   async function fetchTopic(overrideMode?: Mode, overrideCategory?: Category): Promise<string> {
     try {
@@ -249,9 +249,12 @@ function Index() {
       if (data && data.status === "success" && data.topic && data.topic.trim()) {
         return data.topic;
       }
-      return pickLocal(m, c);
+      if (data && data.topic) {
+        return data.topic;
+      }
+      return "Gagal mengambil topik AI";
     } catch {
-      return pickLocal(overrideMode, overrideCategory);
+      return "Gagal mengambil topik AI";
     }
   }
 
@@ -273,13 +276,7 @@ function Index() {
     const currentM = mode;
     const currentC = category;
 
-    // Safety fallback: jika API terlalu lama (> 3.5s), pakai topik lokal agar spin pasti berhenti
-    const timerId = setTimeout(() => {
-      setSpinResult((curr) => curr ?? pickLocal(currentM, currentC));
-    }, 3500);
-
     fetchTopic(currentM, currentC).then((t) => {
-      clearTimeout(timerId);
       setSpinResult(t);
     });
   }
@@ -302,7 +299,7 @@ function Index() {
     }
   }
 
-  /** Re-roll: ambil topik baru tanpa mengubah stage */
+  /** Re-roll: ambil topik baru dari AI tanpa mengubah stage */
   async function reroll() {
     setIsLoading(true);
     setSpinResult(null);
@@ -311,12 +308,7 @@ function Index() {
     const currentM = mode;
     const currentC = category;
 
-    const timerId = setTimeout(() => {
-      setSpinResult((curr) => curr ?? pickLocal(currentM, currentC));
-    }, 3500);
-
     fetchTopic(currentM, currentC).then((t) => {
-      clearTimeout(timerId);
       setSpinResult(t);
     });
   }
@@ -360,7 +352,7 @@ function Index() {
                 setMode(m.id);
                 usedRef.current.clear();
                 resetRound();
-                setTopic(pickLocal(m.id, category));
+                setTopic("Tekan 'Putar' untuk topik AI ✨");
                 setPrepSeconds(m.id === "research" ? 600 : 30);
                 setSpeakSeconds(m.id === "research" ? 120 : 60);
               }}
@@ -393,6 +385,9 @@ function Index() {
                 onChange={(c) => {
                   setCategory(c);
                   usedRef.current.clear();
+                  if (stage === "idle" && !isLoading) {
+                    setTopic("Tekan 'Putar' untuk topik AI ✨");
+                  }
                 }}
               />
             )}
@@ -449,7 +444,7 @@ function Index() {
         <div className="w-full rounded-3xl bg-card p-10 shadow-[0_4px_24px_rgba(15,23,42,0.06)] sm:p-14">
           {isLoading ? (
             <SlotSpinner
-              pool={localPool()}
+              pool={SPINNER_POOL}
               finalTopic={spinResult}
               onComplete={handleSpinComplete}
             />

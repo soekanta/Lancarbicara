@@ -2,7 +2,7 @@ import { r as __toESM } from "../_runtime.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-CVDkuCtz.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-C9Ir2w_L.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-DGl3X9dK.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var CATEGORIES = [
@@ -66,343 +66,6 @@ var CATEGORIES = [
 		label: "Relasi",
 		emoji: "🤝"
 	}
-];
-var IMPROMPTU_TOPICS = {
-	umum: [
-		"Kopi",
-		"Hujan",
-		"Liburan",
-		"Musik",
-		"Makanan",
-		"Teman",
-		"Keluarga",
-		"Sepeda",
-		"Pantai",
-		"Gunung",
-		"Buku",
-		"Film",
-		"Hobi",
-		"Pagi",
-		"Malam",
-		"Rumah",
-		"Kota",
-		"Perjalanan",
-		"Kenangan",
-		"Mimpi",
-		"Kucing",
-		"Kendaraan",
-		"Belanja",
-		"Cuaca",
-		"Festival",
-		"Kereta",
-		"Tidur",
-		"Permainan",
-		"Langit",
-		"Jalanan"
-	],
-	keuangan: [
-		"Menabung",
-		"Utang",
-		"Investasi",
-		"Anggaran",
-		"Inflasi",
-		"Pensiun",
-		"Deposito",
-		"Reksa dana",
-		"Saham",
-		"Asuransi",
-		"Pajak",
-		"Bunga",
-		"Dana darurat",
-		"Kredit",
-		"Aset",
-		"Pengeluaran",
-		"Warisan",
-		"Emas",
-		"Properti",
-		"Gaji"
-	],
-	wirausaha: [
-		"Pelanggan",
-		"Modal",
-		"Risiko",
-		"Branding",
-		"Pemasaran",
-		"Harga",
-		"Inovasi",
-		"Pesaing",
-		"Kegagalan",
-		"Jaringan",
-		"Skala",
-		"Layanan",
-		"Produk",
-		"Pasar",
-		"Kemitraan",
-		"Arus kas",
-		"Reputasi",
-		"Lokasi",
-		"Promosi",
-		"Ketekunan"
-	],
-	startup: [
-		"Validasi",
-		"Pitch",
-		"Pendanaan",
-		"MVP",
-		"Pivot",
-		"Traction",
-		"Founder",
-		"Burn rate",
-		"Inkubator",
-		"Angel",
-		"Valuasi",
-		"Bootstrap",
-		"Pertumbuhan",
-		"Retensi",
-		"Ekosistem",
-		"Exit",
-		"Unicorn",
-		"Demo day",
-		"Cofounder",
-		"Runway"
-	],
-	teknologi: [
-		"Kecerdasan buatan",
-		"Robotika",
-		"Internet",
-		"Gadget",
-		"Aplikasi",
-		"Data",
-		"Privasi",
-		"Siber",
-		"Komputasi awan",
-		"Media sosial",
-		"Gim",
-		"Blockchain",
-		"Otomatisasi",
-		"Algoritma",
-		"Satelit",
-		"Layar",
-		"Baterai",
-		"Koding",
-		"Cip",
-		"Virtual reality"
-	],
-	kebugaran: [
-		"Lari",
-		"Angkat beban",
-		"Peregangan",
-		"Kardio",
-		"Otot",
-		"Yoga",
-		"Tidur",
-		"Konsistensi",
-		"Maraton",
-		"Renang",
-		"Postur",
-		"Pemulihan",
-		"Keringat",
-		"Fleksibilitas",
-		"Stamina",
-		"Plank",
-		"Langkah",
-		"Pemanasan",
-		"Disiplin",
-		"Energi"
-	],
-	nutrisi: [
-		"Protein",
-		"Karbo",
-		"Serat",
-		"Hidrasi",
-		"Vitamin",
-		"Gula",
-		"Sarapan",
-		"Puasa",
-		"Kalori",
-		"Sayur",
-		"Buah",
-		"Kafein",
-		"Fermentasi",
-		"Suplemen",
-		"Lemak",
-		"Porsi",
-		"Rempah",
-		"Jajanan",
-		"Masakan",
-		"Diet"
-	],
-	produktivitas: [
-		"Fokus",
-		"Kebiasaan",
-		"Tenggat",
-		"Prioritas",
-		"Prokrastinasi",
-		"Jurnal",
-		"Rutinitas",
-		"Deep work",
-		"Multitasking",
-		"Istirahat",
-		"Tujuan",
-		"To-do list",
-		"Pomodoro",
-		"Motivasi",
-		"Rapat",
-		"Inbox",
-		"Pagi hari",
-		"Evaluasi",
-		"Konsentrasi",
-		"Batas"
-	],
-	sejarah: [
-		"Majapahit",
-		"Kolonialisme",
-		"Revolusi",
-		"Sumpah",
-		"Kerajaan",
-		"Perdagangan",
-		"Candi",
-		"Naskah",
-		"Pelabuhan",
-		"Migrasi",
-		"Perang",
-		"Kemerdekaan",
-		"Rempah",
-		"Artefak",
-		"Dinasti",
-		"Konferensi",
-		"Rel",
-		"Pahlawan",
-		"Peta",
-		"Prasasti"
-	],
-	filosofi: [
-		"Kebebasan",
-		"Waktu",
-		"Kebenaran",
-		"Keadilan",
-		"Kebahagiaan",
-		"Takdir",
-		"Kematian",
-		"Cinta",
-		"Kesadaran",
-		"Ego",
-		"Moral",
-		"Pilihan",
-		"Identitas",
-		"Kehampaan",
-		"Keberanian",
-		"Kesunyian",
-		"Penderitaan",
-		"Harapan",
-		"Kejujuran",
-		"Kekuasaan",
-		"Keabadian",
-		"Makna",
-		"Tuhan",
-		"Keraguan",
-		"Keindahan",
-		"Kesederhanaan",
-		"Kesepian",
-		"Kebijaksanaan",
-		"Keterbatasan",
-		"Pengampunan"
-	],
-	karier: [
-		"Kepemimpinan",
-		"Presentasi",
-		"Negosiasi",
-		"Kerjasama",
-		"Promosi",
-		"Wawancara",
-		"Konflik",
-		"Klien",
-		"Strategi",
-		"Delegasi",
-		"Etika",
-		"Umpan balik",
-		"Target",
-		"Krisis",
-		"Keputusan",
-		"Persaingan",
-		"Kepercayaan",
-		"Adaptasi",
-		"Resign",
-		"Mentor"
-	],
-	relasi: [
-		"Persahabatan",
-		"Kepercayaan",
-		"Komunikasi",
-		"Empati",
-		"Batasan",
-		"Keluarga",
-		"Pasangan",
-		"Konflik",
-		"Maaf",
-		"Kesetiaan",
-		"Jarak",
-		"Pendengar",
-		"Kerendahan hati",
-		"Dukungan",
-		"Pertengkaran",
-		"Tetangga",
-		"Komunitas",
-		"Pertemuan",
-		"Perpisahan",
-		"Penerimaan"
-	]
-};
-var RESEARCH_TOPICS = [
-	"The Jakarta Method",
-	"Newton's Laws",
-	"Cloaca Maxima",
-	"Efek Zeigarnik",
-	"Paradoks Fermi",
-	"Bias konfirmasi",
-	"Hukum Goodhart",
-	"Paradoks Simpson",
-	"Efek Dunning-Kruger",
-	"Kurva Laffer",
-	"Dilema tahanan",
-	"Hipotesis pasar efisien",
-	"Aturan 72",
-	"Entropi",
-	"Prinsip ketidakpastian Heisenberg",
-	"Seleksi kerabat",
-	"Mikrobioma usus",
-	"Neuroplastisitas",
-	"Resistensi antibiotik",
-	"Umpan balik iklim",
-	"Perdagangan karbon",
-	"Ekonomi sirkular",
-	"Enkripsi kunci publik",
-	"Gradient descent",
-	"AI alignment",
-	"Komputasi kuantum",
-	"Hukum Moore",
-	"Efek jaringan",
-	"Rantai pasok semikonduktor",
-	"Pendapatan dasar universal",
-	"Koefisien Gini",
-	"Kota 15 menit",
-	"Transisi demografi",
-	"Soft power",
-	"Teori jendela pecah",
-	"Krisis replikasi",
-	"Placebo dan nocebo",
-	"Heuristik ketersediaan",
-	"Path dependence",
-	"Antropocene",
-	"Great Oxidation Event",
-	"Kondratiev wave",
-	"Efek Matthew",
-	"Paradoks Abilene",
-	"Streisand effect",
-	"Lindy effect",
-	"Hukum Parkinson",
-	"Prinsip Pareto",
-	"Occam's razor"
 ];
 /**
 * Countdown berbasis Date.now() agar tetap akurat saat tab tidak aktif.
@@ -1056,29 +719,31 @@ function Index() {
 		recordEnabled,
 		history
 	]);
+	const SPINNER_POOL = [
+		"Eksplorasi",
+		"Gagasan",
+		"Perspektif",
+		"Strategi",
+		"Wawasan",
+		"Inovasi",
+		"Dinamika",
+		"Konsep",
+		"Teori",
+		"Analisis",
+		"Refleksi",
+		"Visi"
+	];
 	(0, import_react.useEffect)(() => {
-		if (hydrated && topic === null && stage === "idle") setTopic(pickLocal());
+		if (hydrated && topic === null && stage === "idle") setTopic("Tekan tombol 'Putar' untuk topik AI ✨");
 	}, [hydrated]);
-	function localPool(overrideMode, overrideCategory) {
-		return (overrideMode ?? mode) === "research" ? RESEARCH_TOPICS : IMPROMPTU_TOPICS[overrideCategory ?? category];
-	}
-	function pickLocal(overrideMode, overrideCategory) {
-		const pool = localPool(overrideMode, overrideCategory);
-		const fresh = pool.filter((t) => !usedRef.current.has(t));
-		const list = fresh.length > 0 ? fresh : (usedRef.current.clear(), pool);
-		const picked = list[Math.floor(Math.random() * list.length)];
-		usedRef.current.add(picked);
-		return picked;
-	}
 	async function fetchTopic(overrideMode, overrideCategory) {
 		try {
-			const m = overrideMode ?? mode;
-			const c = overrideCategory ?? category;
-			const data = await generateTopic({ data: { cat: m === "research" ? "riset" : c } });
+			const data = await generateTopic({ data: { cat: (overrideMode ?? mode) === "research" ? "riset" : overrideCategory ?? category } });
 			if (data && data.status === "success" && data.topic && data.topic.trim()) return data.topic;
-			return pickLocal(m, c);
+			if (data && data.topic) return data.topic;
+			return "Gagal mengambil topik AI";
 		} catch {
-			return pickLocal(overrideMode, overrideCategory);
+			return "Gagal mengambil topik AI";
 		}
 	}
 	function resetRound() {
@@ -1094,13 +759,7 @@ function Index() {
 		setSpinResult(null);
 		timer.stop();
 		recorder.clear();
-		const currentM = mode;
-		const currentC = category;
-		const timerId = setTimeout(() => {
-			setSpinResult((curr) => curr ?? pickLocal(currentM, currentC));
-		}, 3500);
-		fetchTopic(currentM, currentC).then((t) => {
-			clearTimeout(timerId);
+		fetchTopic(mode, category).then((t) => {
 			setSpinResult(t);
 		});
 	}
@@ -1118,18 +777,12 @@ function Index() {
 			timer.start(prepSeconds);
 		} else setStage("ready");
 	}
-	/** Re-roll: ambil topik baru tanpa mengubah stage */
+	/** Re-roll: ambil topik baru dari AI tanpa mengubah stage */
 	async function reroll() {
 		setIsLoading(true);
 		setSpinResult(null);
 		timer.stop();
-		const currentM = mode;
-		const currentC = category;
-		const timerId = setTimeout(() => {
-			setSpinResult((curr) => curr ?? pickLocal(currentM, currentC));
-		}, 3500);
-		fetchTopic(currentM, currentC).then((t) => {
-			clearTimeout(timerId);
+		fetchTopic(mode, category).then((t) => {
 			setSpinResult(t);
 		});
 	}
@@ -1173,7 +826,7 @@ function Index() {
 								setMode(m.id);
 								usedRef.current.clear();
 								resetRound();
-								setTopic(pickLocal(m.id, category));
+								setTopic("Tekan 'Putar' untuk topik AI ✨");
 								setPrepSeconds(m.id === "research" ? 600 : 30);
 								setSpeakSeconds(m.id === "research" ? 120 : 60);
 							},
@@ -1203,6 +856,7 @@ function Index() {
 							onChange: (c) => {
 								setCategory(c);
 								usedRef.current.clear();
+								if (stage === "idle" && !isLoading) setTopic("Tekan 'Putar' untuk topik AI ✨");
 							}
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex w-full flex-col gap-4 sm:flex-row sm:justify-center",
@@ -1240,7 +894,7 @@ function Index() {
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "w-full rounded-3xl bg-card p-10 shadow-[0_4px_24px_rgba(15,23,42,0.06)] sm:p-14",
 						children: isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotSpinner, {
-							pool: localPool(),
+							pool: SPINNER_POOL,
 							finalTopic: spinResult,
 							onComplete: handleSpinComplete
 						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
