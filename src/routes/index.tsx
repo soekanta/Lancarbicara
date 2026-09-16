@@ -12,6 +12,7 @@ import { useRecorder } from "@/hooks/useRecorder";
 import { TimerRing } from "@/components/TimerRing";
 import { RecordingPanel } from "@/components/RecordingPanel";
 import { CategorySelect } from "@/components/CategorySelect";
+import { SlotSpinner } from "@/components/SlotSpinner";
 import { generateTopic } from "@/lib/generate-topic";
 
 export const Route = createFileRoute("/")({
@@ -98,58 +99,7 @@ function playChime() {
   }
 }
 
-/** Suara klik pendek ala mesin slot — pitch naik seiring progress (0→1). */
-function playSpinTick(progress: number) {
-  try {
-    const Ctx =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    const t = ctx.currentTime;
-
-    // Klik perkusif: noise burst sangat pendek
-    const bufferSize = ctx.sampleRate * 0.02; // 20 ms
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 8);
-    }
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
-
-    // Filter — frekuensi naik seiring progress agar makin nyaring
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = 1200 + progress * 3000;
-    filter.Q.value = 2;
-
-    // Volume — sedikit lebih keras di akhir
-    const gain = ctx.createGain();
-    const vol = 0.15 + progress * 0.2;
-    gain.gain.setValueAtTime(vol, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
-
-    noise.connect(filter).connect(gain).connect(ctx.destination);
-    noise.start(t);
-    noise.stop(t + 0.04);
-
-    // Tambahkan nada tonal pendek agar terdengar "klik" yang jelas
-    const osc = ctx.createOscillator();
-    const oscGain = ctx.createGain();
-    osc.type = "triangle";
-    osc.frequency.value = 600 + progress * 800;
-    oscGain.gain.setValueAtTime(vol * 0.5, t);
-    oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
-    osc.connect(oscGain).connect(ctx.destination);
-    osc.start(t);
-    osc.stop(t + 0.03);
-
-    setTimeout(() => void ctx.close(), 200);
-  } catch {
-    /* abaikan */
-  }
-}
+/* playSpinTick dihapus — suara tick sekarang di dalam komponen SlotSpinner */
 
 /** Suara "ding" pendek saat topik terpilih — kesan reveal yang memuaskan. */
 function playSpinReveal() {
@@ -208,7 +158,7 @@ function Index() {
   const [stage, setStage] = useState<Stage>("idle");
   const [topic, setTopic] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [spinText, setSpinText] = useState<string | null>(null);
+  const [spinResult, setSpinResult] = useState<string | null>(null);
   const [history, setHistory] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
@@ -310,37 +260,25 @@ function Index() {
 
   async function drawTopic() {
     setIsLoading(true);
+    setSpinResult(null);
     timer.stop();
     recorder.clear();
 
-    // Ambil topik sambil memutar animasi spinner ala mesin slot
-    const pool = localPool();
-    let result: string | null = null;
-    const fetchPromise = fetchTopic().then((t) => {
-      result = t;
+    // Mulai fetch di background; SlotSpinner akan menerima hasil lewat spinResult
+    fetchTopic().then((t) => {
+      setSpinResult(t);
     });
-    const spinStart = performance.now();
-    await new Promise<void>((resolve) => {
-      const tick = () => {
-        const elapsed = performance.now() - spinStart;
-        if (elapsed >= 1100 && result !== null) {
-          setSpinText(null);
-          resolve();
-          return;
-        }
-        setSpinText(pool[Math.floor(Math.random() * pool.length)]!);
-        const t = Math.min(elapsed / 1100, 1);
-        playSpinTick(t);
-        setTimeout(tick, 50 + t * t * 260);
-      };
-      tick();
-    });
-    await fetchPromise;
-    const next = result!;
+  }
+
+  /** Dipanggil oleh SlotSpinner setelah animasi selesai sempurna */
+  function handleSpinComplete() {
+    if (!spinResult) return;
+    const next = spinResult;
     setTopic(next);
     playSpinReveal();
     setHistory((h) => [next, ...h.filter((t) => t !== next)].slice(0, 8));
     setIsLoading(false);
+    setSpinResult(null);
 
     if (prepSeconds > 0) {
       setStage("prep");
@@ -348,6 +286,17 @@ function Index() {
     } else {
       setStage("ready");
     }
+  }
+
+  /** Re-roll: ambil topik baru tanpa mengubah stage */
+  async function reroll() {
+    setIsLoading(true);
+    setSpinResult(null);
+    timer.stop();
+
+    fetchTopic().then((t) => {
+      setSpinResult(t);
+    });
   }
 
   async function startSpeaking() {
@@ -477,18 +426,29 @@ function Index() {
         {/* Kartu topik */}
         <div className="w-full rounded-3xl bg-card p-10 shadow-[0_4px_24px_rgba(15,23,42,0.06)] sm:p-14">
           {isLoading ? (
-            <p
-              aria-busy="true"
-              className="animate-pulse text-center text-3xl font-bold leading-snug text-muted-foreground sm:text-5xl"
-            >
-              {spinText ?? "…"}
-            </p>
+            <SlotSpinner
+              pool={localPool()}
+              finalTopic={spinResult}
+              onComplete={handleSpinComplete}
+            />
           ) : (
             <p className="text-center text-3xl font-bold leading-snug transition-opacity duration-300 sm:text-5xl">
               {topic ?? "…"}
             </p>
           )}
         </div>
+
+        {/* Tombol Re-roll — muncul saat topik sudah tampil dan bukan saat spin */}
+        {!isLoading && topic && stage !== "speaking" && (
+          <button
+            onClick={reroll}
+            disabled={isLoading}
+            className="btn-reroll"
+            title="Ganti topik"
+          >
+            <span className="reroll-icon">🔄</span> Ganti Topik
+          </button>
+        )}
 
         {/* Tahap aktif */}
         {(stage === "prep" || stage === "speaking") && (

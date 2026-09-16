@@ -2,7 +2,7 @@ import { r as __toESM } from "../_runtime.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-Cq8nDew5.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-UCcY5TdT.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-qJRfBqCw.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var CATEGORIES = [
@@ -682,6 +682,160 @@ function CategorySelect({ value, onChange }) {
 		})]
 	});
 }
+/** Suara "tik" mekanis halus ala putaran mahkota jam tangan. */
+function playWatchTick(progress) {
+	try {
+		const Ctx = window.AudioContext || window.webkitAudioContext;
+		if (!Ctx) return;
+		const ctx = new Ctx();
+		const t = ctx.currentTime;
+		const sampleRate = ctx.sampleRate;
+		const bufferSize = Math.floor(sampleRate * .008);
+		const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
+		const data = buffer.getChannelData(0);
+		for (let i = 0; i < bufferSize; i++) {
+			const env = Math.exp(-i / (bufferSize * .08));
+			data[i] = env * (Math.sin(2 * Math.PI * 3200 * i / sampleRate) * .7 + Math.sin(2 * Math.PI * 6400 * i / sampleRate) * .2 + (Math.random() * 2 - 1) * .1);
+		}
+		const source = ctx.createBufferSource();
+		source.buffer = buffer;
+		const hp = ctx.createBiquadFilter();
+		hp.type = "highpass";
+		hp.frequency.value = 2e3 + progress * 2e3;
+		hp.Q.value = 1.5;
+		const gain = ctx.createGain();
+		const vol = .12 + progress * .18;
+		gain.gain.setValueAtTime(vol, t);
+		gain.gain.exponentialRampToValueAtTime(.001, t + .015);
+		source.connect(hp).connect(gain).connect(ctx.destination);
+		source.start(t);
+		source.stop(t + .02);
+		setTimeout(() => void ctx.close(), 100);
+	} catch {}
+}
+/**
+* Animasi gulir vertikal ala mesin slot.
+*
+* Menampilkan 3 baris: atas (opacity 20%, blur), tengah (terang, besar), bawah (opacity 20%, blur).
+* Spin mulai cepat lalu melambat secara alami (easing deceleration).
+* Setelah finalTopic diterima, melambat dan berhenti halus tepat di kata tersebut.
+*/
+function SlotSpinner({ pool, finalTopic, onComplete }) {
+	const containerRef = (0, import_react.useRef)(null);
+	const rafRef = (0, import_react.useRef)(0);
+	const [visibleItems, setVisibleItems] = (0, import_react.useState)([
+		"",
+		"",
+		""
+	]);
+	const indexRef = (0, import_react.useRef)(0);
+	const startTimeRef = (0, import_react.useRef)(0);
+	const lastTickTimeRef = (0, import_react.useRef)(0);
+	const finalReceivedRef = (0, import_react.useRef)(false);
+	const deceleratingRef = (0, import_react.useRef)(false);
+	const currentIntervalRef = (0, import_react.useRef)(80);
+	const completedRef = (0, import_react.useRef)(false);
+	const shuffledPool = (0, import_react.useRef)([]);
+	(0, import_react.useEffect)(() => {
+		const arr = [...pool];
+		for (let i = arr.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[arr[i], arr[j]] = [arr[j], arr[i]];
+		}
+		shuffledPool.current = arr;
+	}, [pool]);
+	const getItem = (0, import_react.useCallback)((idx) => {
+		const p = shuffledPool.current;
+		if (p.length === 0) return "…";
+		return p[(idx % p.length + p.length) % p.length];
+	}, []);
+	(0, import_react.useEffect)(() => {
+		if (finalTopic) finalReceivedRef.current = true;
+	}, [finalTopic]);
+	(0, import_react.useEffect)(() => {
+		startTimeRef.current = performance.now();
+		lastTickTimeRef.current = performance.now();
+		indexRef.current = Math.floor(Math.random() * pool.length);
+		completedRef.current = false;
+		finalReceivedRef.current = !!finalTopic;
+		deceleratingRef.current = false;
+		currentIntervalRef.current = 80;
+		const idx = indexRef.current;
+		setVisibleItems([
+			getItem(idx - 1),
+			getItem(idx),
+			getItem(idx + 1)
+		]);
+		const animate = () => {
+			const now = performance.now();
+			const elapsed = now - startTimeRef.current;
+			if (finalReceivedRef.current && elapsed > 1200 && !deceleratingRef.current) deceleratingRef.current = true;
+			if (deceleratingRef.current) currentIntervalRef.current = Math.min(currentIntervalRef.current * 1.12, 500);
+			else {
+				const normalProgress = Math.min(elapsed / 1200, 1);
+				currentIntervalRef.current = 80 + normalProgress * 40;
+			}
+			if (now - lastTickTimeRef.current >= currentIntervalRef.current) {
+				lastTickTimeRef.current = now;
+				indexRef.current += 1;
+				const progress = Math.min(elapsed / 3e3, 1);
+				if (deceleratingRef.current && currentIntervalRef.current >= 450 && finalTopic && !completedRef.current) {
+					completedRef.current = true;
+					const lastPoolItem = getItem(indexRef.current - 1);
+					setVisibleItems([
+						lastPoolItem,
+						finalTopic,
+						""
+					]);
+					playWatchTick(1);
+					setTimeout(() => {
+						onComplete();
+					}, 600);
+					return;
+				}
+				const idx = indexRef.current;
+				setVisibleItems([
+					getItem(idx - 1),
+					getItem(idx),
+					getItem(idx + 1)
+				]);
+				playWatchTick(progress);
+			}
+			rafRef.current = requestAnimationFrame(animate);
+		};
+		rafRef.current = requestAnimationFrame(animate);
+		return () => {
+			if (rafRef.current) cancelAnimationFrame(rafRef.current);
+		};
+	}, []);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		ref: containerRef,
+		className: "slot-container",
+		"aria-busy": "true",
+		"aria-label": "Memilih topik\\u2026",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "slot-track",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "slot-item slot-item-ghost",
+						children: visibleItems[0]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "slot-item slot-item-active",
+						children: visibleItems[1]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "slot-item slot-item-ghost",
+						children: visibleItems[2]
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "slot-mask-top" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "slot-mask-bottom" })
+		]
+	});
+}
 var createSsrRpc = (functionId) => {
 	const url = "/_serverFn/" + functionId;
 	const serverFnMeta = { id: functionId };
@@ -810,42 +964,6 @@ function playChime() {
 		setTimeout(() => void ctx.close(), 1200);
 	} catch {}
 }
-/** Suara klik pendek ala mesin slot — pitch naik seiring progress (0→1). */
-function playSpinTick(progress) {
-	try {
-		const Ctx = window.AudioContext || window.webkitAudioContext;
-		if (!Ctx) return;
-		const ctx = new Ctx();
-		const t = ctx.currentTime;
-		const bufferSize = ctx.sampleRate * .02;
-		const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-		const data = buffer.getChannelData(0);
-		for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 8);
-		const noise = ctx.createBufferSource();
-		noise.buffer = buffer;
-		const filter = ctx.createBiquadFilter();
-		filter.type = "bandpass";
-		filter.frequency.value = 1200 + progress * 3e3;
-		filter.Q.value = 2;
-		const gain = ctx.createGain();
-		const vol = .15 + progress * .2;
-		gain.gain.setValueAtTime(vol, t);
-		gain.gain.exponentialRampToValueAtTime(.001, t + .04);
-		noise.connect(filter).connect(gain).connect(ctx.destination);
-		noise.start(t);
-		noise.stop(t + .04);
-		const osc = ctx.createOscillator();
-		const oscGain = ctx.createGain();
-		osc.type = "triangle";
-		osc.frequency.value = 600 + progress * 800;
-		oscGain.gain.setValueAtTime(vol * .5, t);
-		oscGain.gain.exponentialRampToValueAtTime(.001, t + .03);
-		osc.connect(oscGain).connect(ctx.destination);
-		osc.start(t);
-		osc.stop(t + .03);
-		setTimeout(() => void ctx.close(), 200);
-	} catch {}
-}
 /** Suara "ding" pendek saat topik terpilih — kesan reveal yang memuaskan. */
 function playSpinReveal() {
 	try {
@@ -888,7 +1006,7 @@ function Index() {
 	const [stage, setStage] = (0, import_react.useState)("idle");
 	const [topic, setTopic] = (0, import_react.useState)(null);
 	const [isLoading, setIsLoading] = (0, import_react.useState)(false);
-	const [spinText, setSpinText] = (0, import_react.useState)(null);
+	const [spinResult, setSpinResult] = (0, import_react.useState)(null);
 	const [history, setHistory] = (0, import_react.useState)([]);
 	const [hydrated, setHydrated] = (0, import_react.useState)(false);
 	const usedRef = (0, import_react.useRef)(/* @__PURE__ */ new Set());
@@ -969,39 +1087,35 @@ function Index() {
 	}
 	async function drawTopic() {
 		setIsLoading(true);
+		setSpinResult(null);
 		timer.stop();
 		recorder.clear();
-		const pool = localPool();
-		let result = null;
-		const fetchPromise = fetchTopic().then((t) => {
-			result = t;
+		fetchTopic().then((t) => {
+			setSpinResult(t);
 		});
-		const spinStart = performance.now();
-		await new Promise((resolve) => {
-			const tick = () => {
-				const elapsed = performance.now() - spinStart;
-				if (elapsed >= 1100 && result !== null) {
-					setSpinText(null);
-					resolve();
-					return;
-				}
-				setSpinText(pool[Math.floor(Math.random() * pool.length)]);
-				const t = Math.min(elapsed / 1100, 1);
-				playSpinTick(t);
-				setTimeout(tick, 50 + t * t * 260);
-			};
-			tick();
-		});
-		await fetchPromise;
-		const next = result;
+	}
+	/** Dipanggil oleh SlotSpinner setelah animasi selesai sempurna */
+	function handleSpinComplete() {
+		if (!spinResult) return;
+		const next = spinResult;
 		setTopic(next);
 		playSpinReveal();
 		setHistory((h) => [next, ...h.filter((t) => t !== next)].slice(0, 8));
 		setIsLoading(false);
+		setSpinResult(null);
 		if (prepSeconds > 0) {
 			setStage("prep");
 			timer.start(prepSeconds);
 		} else setStage("ready");
+	}
+	/** Re-roll: ambil topik baru tanpa mengubah stage */
+	async function reroll() {
+		setIsLoading(true);
+		setSpinResult(null);
+		timer.stop();
+		fetchTopic().then((t) => {
+			setSpinResult(t);
+		});
 	}
 	async function startSpeaking() {
 		if (recordEnabled) await recorder.start();
@@ -1109,14 +1223,24 @@ function Index() {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "w-full rounded-3xl bg-card p-10 shadow-[0_4px_24px_rgba(15,23,42,0.06)] sm:p-14",
-						children: isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							"aria-busy": "true",
-							className: "animate-pulse text-center text-3xl font-bold leading-snug text-muted-foreground sm:text-5xl",
-							children: spinText ?? "…"
+						children: isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotSpinner, {
+							pool: localPool(),
+							finalTopic: spinResult,
+							onComplete: handleSpinComplete
 						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-center text-3xl font-bold leading-snug transition-opacity duration-300 sm:text-5xl",
 							children: topic ?? "…"
 						})
+					}),
+					!isLoading && topic && stage !== "speaking" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						onClick: reroll,
+						disabled: isLoading,
+						className: "btn-reroll",
+						title: "Ganti topik",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "reroll-icon",
+							children: "🔄"
+						}), " Ganti Topik"]
 					}),
 					(stage === "prep" || stage === "speaking") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TimerRing, {
 						remaining: timer.remaining,
