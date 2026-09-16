@@ -1,5 +1,5 @@
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/generate-topic-Cqj8T1CY.js
+//#region node_modules/.nitro/vite/services/ssr/assets/generate-topic-B4aLa-qP.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -40,12 +40,13 @@ var generateTopic = createServerFn({ method: "GET" }).validator((input) => {
 		topic: "API Key belum dikonfigurasi",
 		source: "error"
 	};
-	const primaryModel = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+	const primaryModel = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 	const modelsToTry = Array.from(/* @__PURE__ */ new Set([
 		primaryModel,
-		"gemini-1.5-flash",
-		"gemini-1.5-pro",
-		"gemini-2.0-flash-exp"
+		"gemini-3.6-flash",
+		"gemini-3.5-flash",
+		"gemini-3.7-flash",
+		"gemini-flash-latest"
 	]));
 	const label = categoryLabels[cat] || cat;
 	let prompt;
