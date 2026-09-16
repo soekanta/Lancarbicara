@@ -1,8 +1,8 @@
 import { r as __toESM } from "../_runtime.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-CVDkuCtz.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-DGl3X9dK.js
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-C_MiSPHl.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-DY09Iu0e.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var CATEGORIES = [
@@ -769,7 +769,7 @@ function Index() {
 		const next = spinResult;
 		setTopic(next);
 		playSpinReveal();
-		setHistory((h) => [next, ...h.filter((t) => t !== next)].slice(0, 8));
+		if (!next.includes("sibuk") && !next.includes("Gagal") && !next.includes("API")) setHistory((h) => [next, ...h.filter((t) => t !== next)].slice(0, 8));
 		setIsLoading(false);
 		setSpinResult(null);
 		if (prepSeconds > 0) {

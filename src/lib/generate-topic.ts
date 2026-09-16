@@ -38,7 +38,7 @@ export const generateTopic = createServerFn({ method: "GET" })
 
     const primaryModel = process.env.GEMINI_MODEL || "gemini-3.6-flash";
     const modelsToTry = Array.from(
-      new Set([primaryModel, "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.7-flash", "gemini-flash-latest"])
+      new Set([primaryModel, "gemini-3.6-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-flash-latest"])
     );
     const label = categoryLabels[cat] || cat;
 
@@ -69,42 +69,51 @@ export const generateTopic = createServerFn({ method: "GET" })
       },
     });
 
-    let lastError = "";
-
     for (const model of modelsToTry) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: payload,
-          signal: AbortSignal.timeout(8000),
-        });
-
-        if (!res.ok) {
-          const errText = await res.text().catch(() => "");
-          console.warn(`Gemini model ${model} error ${res.status}:`, errText);
-          lastError = `Gemini API (${model}): ${res.status}`;
-          continue; // Coba model berikutnya jika 503 / busy
-        }
-
-        const json = (await res.json()) as {
-          candidates?: { content?: { parts?: { text?: string }[] } }[];
-        };
-        const text = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
-        if (text) {
-          const cleaned = text.replace(/^["']+|["']+$/g, "").replace(/\.+$/, "").trim();
-          if (cleaned) {
-            return { status: "success" as const, topic: cleaned, source: "gemini" as const };
+      // Coba hingga 2x per model jika 503 / busy
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          if (attempt > 0) {
+            await new Promise((r) => setTimeout(r, 400));
           }
+
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: payload,
+            signal: AbortSignal.timeout(8000),
+          });
+
+          if (!res.ok) {
+            console.warn(`Gemini model ${model} attempt ${attempt + 1} error ${res.status}`);
+            if (res.status === 503 || res.status === 429) {
+              continue; // Retry percobaan kedua untuk model yang sama
+            }
+            break; // Jika error 404/400, pindah ke model berikutnya
+          }
+
+          const json = (await res.json()) as {
+            candidates?: { content?: { parts?: { text?: string }[] } }[];
+          };
+          const text = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+          if (text) {
+            const cleaned = text.replace(/^["']+|["']+$/g, "").replace(/\.+$/, "").trim();
+            if (cleaned) {
+              return { status: "success" as const, topic: cleaned, source: "gemini" as const };
+            }
+          }
+        } catch (err) {
+          console.warn(`Gemini API fetch error on model ${model} attempt ${attempt + 1}:`, err);
         }
-      } catch (err) {
-        console.warn(`Gemini API fetch error on model ${model}:`, err);
-        lastError = "Gagal menghubungi API";
       }
     }
 
-    return { status: "error" as const, topic: lastError || "API Gagal", source: "error" as const };
+    return {
+      status: "error" as const,
+      topic: "Server AI sedang sibuk. Silakan coba 'Ganti Topik' lagi.",
+      source: "error" as const,
+    };
   });

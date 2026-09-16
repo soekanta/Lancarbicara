@@ -1,5 +1,5 @@
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/generate-topic-B4aLa-qP.js
+//#region node_modules/.nitro/vite/services/ssr/assets/generate-topic-D7ORCwve.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -44,8 +44,8 @@ var generateTopic = createServerFn({ method: "GET" }).validator((input) => {
 	const modelsToTry = Array.from(/* @__PURE__ */ new Set([
 		primaryModel,
 		"gemini-3.6-flash",
-		"gemini-3.5-flash",
-		"gemini-3.7-flash",
+		"gemini-2.0-flash",
+		"gemini-1.5-flash",
 		"gemini-flash-latest"
 	]));
 	const label = categoryLabels[cat] || cat;
@@ -59,10 +59,10 @@ var generateTopic = createServerFn({ method: "GET" }).validator((input) => {
 			maxOutputTokens: 32
 		}
 	});
-	let lastError = "";
 	for (const model of modelsToTry) {
 		const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-		try {
+		for (let attempt = 0; attempt < 2; attempt++) try {
+			if (attempt > 0) await new Promise((r) => setTimeout(r, 400));
 			const res = await fetch(url, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -70,10 +70,9 @@ var generateTopic = createServerFn({ method: "GET" }).validator((input) => {
 				signal: AbortSignal.timeout(8e3)
 			});
 			if (!res.ok) {
-				const errText = await res.text().catch(() => "");
-				console.warn(`Gemini model ${model} error ${res.status}:`, errText);
-				lastError = `Gemini API (${model}): ${res.status}`;
-				continue;
+				console.warn(`Gemini model ${model} attempt ${attempt + 1} error ${res.status}`);
+				if (res.status === 503 || res.status === 429) continue;
+				break;
 			}
 			const text = (await res.json())?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 			if (text) {
@@ -85,13 +84,12 @@ var generateTopic = createServerFn({ method: "GET" }).validator((input) => {
 				};
 			}
 		} catch (err) {
-			console.warn(`Gemini API fetch error on model ${model}:`, err);
-			lastError = "Gagal menghubungi API";
+			console.warn(`Gemini API fetch error on model ${model} attempt ${attempt + 1}:`, err);
 		}
 	}
 	return {
 		status: "error",
-		topic: lastError || "API Gagal",
+		topic: "Server AI sedang sibuk. Silakan coba 'Ganti Topik' lagi.",
 		source: "error"
 	};
 });

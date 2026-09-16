@@ -285,7 +285,9 @@ const SPINNER_POOL = [
     const next = spinResult;
     setTopic(next);
     playSpinReveal();
-    setHistory((h) => [next, ...h.filter((t) => t !== next)].slice(0, 8));
+    if (!next.includes("sibuk") && !next.includes("Gagal") && !next.includes("API")) {
+      setHistory((h) => [next, ...h.filter((t) => t !== next)].slice(0, 8));
+    }
     setIsLoading(false);
     setSpinResult(null);
 
