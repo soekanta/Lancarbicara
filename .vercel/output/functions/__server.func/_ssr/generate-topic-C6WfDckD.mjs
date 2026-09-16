@@ -1,5 +1,5 @@
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/generate-topic-Q16CHWKl.js
+//#region node_modules/.nitro/vite/services/ssr/assets/generate-topic-C6WfDckD.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -40,12 +40,16 @@ var generateTopic = createServerFn({ method: "GET" }).validator((input) => {
 		topic: "API Key belum dikonfigurasi",
 		source: "error"
 	};
-	const model = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+	const primaryModel = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+	const modelsToTry = Array.from(/* @__PURE__ */ new Set([
+		primaryModel,
+		"gemini-2.5-flash",
+		"gemini-1.5-flash"
+	]));
 	const label = categoryLabels[cat] || cat;
 	let prompt;
 	if (isRiset) prompt = "Kamu adalah generator topik untuk latihan presentasi mendalam. Berikan tepat 1 topik unik dan menarik untuk latihan presentasi riset. Topik harus 1-4 kata, berupa konsep, teori, fenomena, atau ide menarik dari berbagai bidang ilmu. Topik harus belum terlalu mainstream dan mendorong eksplorasi mendalam. Gunakan Bahasa Indonesia (boleh campur istilah asing jika memang lazim). PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.";
 	else prompt = `Kamu adalah generator topik untuk latihan bicara spontan (impromptu speaking). Kategori: ${label}. Berikan tepat 1 topik acak yang cocok untuk latihan bicara spontan dalam kategori tersebut. Topik harus 1-2 kata saja dalam Bahasa Indonesia. PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.`;
-	const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 	const payload = JSON.stringify({
 		contents: [{ parts: [{ text: prompt }] }],
 		generationConfig: {
@@ -53,41 +57,41 @@ var generateTopic = createServerFn({ method: "GET" }).validator((input) => {
 			maxOutputTokens: 32
 		}
 	});
-	try {
-		const res = await fetch(url, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: payload,
-			signal: AbortSignal.timeout(8e3)
-		});
-		if (!res.ok) {
-			const errText = await res.text().catch(() => "");
-			console.error(`Gemini API error ${res.status}:`, errText);
-			return {
-				status: "error",
-				topic: `API Error: ${res.status}`,
-				source: "error"
-			};
+	let lastError = "";
+	for (const model of modelsToTry) {
+		const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+		try {
+			const res = await fetch(url, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: payload,
+				signal: AbortSignal.timeout(8e3)
+			});
+			if (!res.ok) {
+				const errText = await res.text().catch(() => "");
+				console.warn(`Gemini model ${model} error ${res.status}:`, errText);
+				lastError = `Gemini API (${model}): ${res.status}`;
+				continue;
+			}
+			const text = (await res.json())?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+			if (text) {
+				const cleaned = text.replace(/^["']+|["']+$/g, "").replace(/\.+$/, "").trim();
+				if (cleaned) return {
+					status: "success",
+					topic: cleaned,
+					source: "gemini"
+				};
+			}
+		} catch (err) {
+			console.warn(`Gemini API fetch error on model ${model}:`, err);
+			lastError = "Gagal menghubungi API";
 		}
-		const text = (await res.json())?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-		if (!text) return {
-			status: "error",
-			topic: "Respons API kosong",
-			source: "error"
-		};
-		return {
-			status: "success",
-			topic: text.replace(/^["']+|["']+$/g, "").replace(/\.+$/, "").trim(),
-			source: "gemini"
-		};
-	} catch (err) {
-		console.error("Gemini API fetch error:", err);
-		return {
-			status: "error",
-			topic: "Gagal menghubungi API",
-			source: "error"
-		};
 	}
+	return {
+		status: "error",
+		topic: lastError || "API Gagal",
+		source: "error"
+	};
 });
 //#endregion
 export { generateTopic_createServerFn_handler };

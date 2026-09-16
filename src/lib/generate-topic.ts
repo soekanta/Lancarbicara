@@ -36,7 +36,8 @@ export const generateTopic = createServerFn({ method: "GET" })
       return { status: "error" as const, topic: "API Key belum dikonfigurasi", source: "error" as const };
     }
 
-    const model = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+    const primaryModel = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+    const modelsToTry = Array.from(new Set([primaryModel, "gemini-2.5-flash", "gemini-1.5-flash"]));
     const label = categoryLabels[cat] || cat;
 
     // Buat prompt sesuai mode
@@ -58,8 +59,6 @@ export const generateTopic = createServerFn({ method: "GET" })
         "PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.";
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
     const payload = JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
@@ -68,35 +67,42 @@ export const generateTopic = createServerFn({ method: "GET" })
       },
     });
 
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: payload,
-        signal: AbortSignal.timeout(8000),
-      });
+    let lastError = "";
 
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "");
-        console.error(`Gemini API error ${res.status}:`, errText);
-        return { status: "error" as const, topic: `API Error: ${res.status}`, source: "error" as const };
+    for (const model of modelsToTry) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+          signal: AbortSignal.timeout(8000),
+        });
+
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          console.warn(`Gemini model ${model} error ${res.status}:`, errText);
+          lastError = `Gemini API (${model}): ${res.status}`;
+          continue; // Coba model berikutnya jika 503 / busy
+        }
+
+        const json = (await res.json()) as {
+          candidates?: { content?: { parts?: { text?: string }[] } }[];
+        };
+        const text = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+        if (text) {
+          const cleaned = text.replace(/^["']+|["']+$/g, "").replace(/\.+$/, "").trim();
+          if (cleaned) {
+            return { status: "success" as const, topic: cleaned, source: "gemini" as const };
+          }
+        }
+      } catch (err) {
+        console.warn(`Gemini API fetch error on model ${model}:`, err);
+        lastError = "Gagal menghubungi API";
       }
-
-      const json = (await res.json()) as {
-        candidates?: { content?: { parts?: { text?: string }[] } }[];
-      };
-      const text = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
-      if (!text) {
-        return { status: "error" as const, topic: "Respons API kosong", source: "error" as const };
-      }
-
-      // Bersihkan — hapus tanda kutip dan titik di awal/akhir
-      const cleaned = text.replace(/^["']+|["']+$/g, "").replace(/\.+$/, "").trim();
-
-      return { status: "success" as const, topic: cleaned, source: "gemini" as const };
-    } catch (err) {
-      console.error("Gemini API fetch error:", err);
-      return { status: "error" as const, topic: "Gagal menghubungi API", source: "error" as const };
     }
+
+    return { status: "error" as const, topic: lastError || "API Gagal", source: "error" as const };
   });
