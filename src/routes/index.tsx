@@ -292,8 +292,10 @@ function Index() {
     try {
       const query = mode === "research" ? "riset" : category;
       const data = await generateTopic({ data: { cat: query } });
-      if (data.status === "success" && data.topic.trim()) return data.topic;
-      throw new Error(data.topic || "Format tidak valid");
+      if (data && data.status === "success" && data.topic && data.topic.trim()) {
+        return data.topic;
+      }
+      return pickLocal();
     } catch {
       return pickLocal();
     }

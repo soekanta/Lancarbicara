@@ -1,19 +1,19 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-C1sf87Yp.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-itf6UWuv.js
 var tsrStartManifest = () => ({ routes: {
 	__root__: {
 		filePath: "C:/Users/wahyu/Downloads/Compressed/Speak Easy Generator/src/routes/__root.tsx",
 		children: ["/"],
-		preloads: ["/assets/index-wm-lP055.js"],
+		preloads: ["/assets/index-CWHtDJPk.js"],
 		scripts: [{ attrs: {
 			type: "module",
 			async: !0,
-			src: "/assets/index-wm-lP055.js"
+			src: "/assets/index-CWHtDJPk.js"
 		} }]
 	},
 	"/": {
 		filePath: "C:/Users/wahyu/Downloads/Compressed/Speak Easy Generator/src/routes/index.tsx",
 		children: void 0,
-		preloads: ["/assets/routes-1pXHXGvQ.js"]
+		preloads: ["/assets/routes-DS303Q-b.js"]
 	}
 } });
 //#endregion
