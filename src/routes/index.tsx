@@ -152,7 +152,8 @@ function Index() {
   const [category, setCategory] = useState<Category>("umum");
   const [prepSeconds, setPrepSeconds] = useState(30);
   const [speakSeconds, setSpeakSeconds] = useState(60);
-  const [recordEnabled, setRecordEnabled] = useState(true);
+  const [recordEnabled, setRecordEnabled] = useState(false);
+  const [hasSpun, setHasSpun] = useState(false);
   const [stage, setStage] = useState<Stage>("idle");
   const [topic, setTopic] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -285,6 +286,7 @@ const SPINNER_POOL = [
     setStage("idle");
     setIsLoading(false);
     setSpinResult(null);
+    setHasSpun(false);
   }
 
   async function drawTopic() {
@@ -306,6 +308,7 @@ const SPINNER_POOL = [
     if (!spinResult) return;
     const next = spinResult;
     setTopic(next);
+    setHasSpun(true);
     playSpinReveal();
     if (!next.includes("sibuk") && !next.includes("Gagal") && !next.includes("API")) {
       setHistory((h) => [next, ...h.filter((t) => t !== next)].slice(0, 8));
@@ -353,7 +356,7 @@ const SPINNER_POOL = [
   return (
     <div className="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased">
       <header className="mx-auto flex w-full max-w-4xl flex-col items-center gap-4 px-6 pt-8 sm:flex-row sm:justify-between">
-        <h1 className="text-lg font-bold tracking-tight">
+        <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
           Lancar<span className="text-primary">bicara</span>
         </h1>
 
@@ -477,8 +480,8 @@ const SPINNER_POOL = [
           )}
         </div>
 
-        {/* Tombol Re-roll — muncul saat topik sudah tampil dan bukan saat spin */}
-        {!isLoading && topic && stage !== "speaking" && (
+        {/* Tombol Re-roll — hanya muncul setelah spin pertama selesai */}
+        {!isLoading && hasSpun && topic && stage !== "speaking" && (
           <button
             onClick={reroll}
             disabled={isLoading}

@@ -2,7 +2,7 @@ import { r as __toESM } from "../_runtime.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-DdMxuqwx.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-DAtjDPRQ.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-BTgNec-O.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var CATEGORIES = [
@@ -665,7 +665,8 @@ function Index() {
 	const [category, setCategory] = (0, import_react.useState)("umum");
 	const [prepSeconds, setPrepSeconds] = (0, import_react.useState)(30);
 	const [speakSeconds, setSpeakSeconds] = (0, import_react.useState)(60);
-	const [recordEnabled, setRecordEnabled] = (0, import_react.useState)(true);
+	const [recordEnabled, setRecordEnabled] = (0, import_react.useState)(false);
+	const [hasSpun, setHasSpun] = (0, import_react.useState)(false);
 	const [stage, setStage] = (0, import_react.useState)("idle");
 	const [topic, setTopic] = (0, import_react.useState)(null);
 	const [isLoading, setIsLoading] = (0, import_react.useState)(false);
@@ -773,6 +774,7 @@ function Index() {
 		setStage("idle");
 		setIsLoading(false);
 		setSpinResult(null);
+		setHasSpun(false);
 	}
 	async function drawTopic() {
 		setIsLoading(true);
@@ -788,6 +790,7 @@ function Index() {
 		if (!spinResult) return;
 		const next = spinResult;
 		setTopic(next);
+		setHasSpun(true);
 		playSpinReveal();
 		if (!next.includes("sibuk") && !next.includes("Gagal") && !next.includes("API")) setHistory((h) => [next, ...h.filter((t) => t !== next)].slice(0, 8));
 		setIsLoading(false);
@@ -825,7 +828,7 @@ function Index() {
 				className: "mx-auto flex w-full max-w-4xl flex-col items-center gap-4 px-6 pt-8 sm:flex-row sm:justify-between",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
-						className: "text-lg font-bold tracking-tight",
+						className: "text-xl font-extrabold tracking-tight sm:text-2xl",
 						children: ["Lancar", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-primary",
 							children: "bicara"
@@ -922,7 +925,7 @@ function Index() {
 							children: topic ?? "…"
 						})
 					}),
-					!isLoading && topic && stage !== "speaking" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					!isLoading && hasSpun && topic && stage !== "speaking" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: reroll,
 						disabled: isLoading,
 						className: "btn-reroll",
