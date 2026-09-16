@@ -36,9 +36,9 @@ export const generateTopic = createServerFn({ method: "GET" })
       return { status: "error" as const, topic: "API Key belum dikonfigurasi", source: "error" as const };
     }
 
-    const primaryModel = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+    const primaryModel = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
     const modelsToTry = Array.from(
-      new Set([primaryModel, "gemini-3.6-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-flash-latest"])
+      new Set([primaryModel, "gemini-3.5-flash-lite", "gemini-2.5-flash-lite"])
     );
     const label = categoryLabels[cat] || cat;
 

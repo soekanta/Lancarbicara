@@ -1,8 +1,8 @@
 import { r as __toESM } from "../_runtime.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-C_MiSPHl.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-DY09Iu0e.js
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-DdMxuqwx.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-BlAfohfd.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var CATEGORIES = [
