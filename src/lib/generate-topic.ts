@@ -56,18 +56,20 @@ export const generateTopic = createServerFn({ method: "POST" })
       prompt =
         "Kamu adalah generator topik untuk latihan presentasi. " +
         "Berikan tepat 1 topik menarik yang cocok untuk dipresentasikan oleh orang umum setelah riset singkat. " +
-        "Topik harus 1-4 kata dalam Bahasa Indonesia. " +
+        "Topik harus 1-4 kata. Gunakan Bahasa Indonesia jika ada padanan yang lazim, " +
+        "tapi jangan terjemahkan paksa istilah asing yang memang lebih dikenal dalam bahasa aslinya (contoh: tetap tulis 'Dunning-Kruger Effect', bukan 'Efek Mandor Bodoh'). " +
         "Topik boleh dari bidang apa saja (sains, sosial, teknologi, budaya, bisnis, sejarah, dll) " +
         "tapi harus mudah dipahami audiens umum dan relevan dengan kehidupan nyata. " +
         "Hindari topik yang terlalu teknis, terlalu niche, atau hanya dikenal kalangan akademisi spesialis. " +
-        "Contoh topik yang bagus: 'Efek Placebo', 'Ekonomi Perhatian', 'Tidur dan Memori', 'Efek Dunning-Kruger', 'Bahasa Punah'. " +
+        "Contoh topik yang bagus: 'Efek Placebo', 'Ekonomi Perhatian', 'Tidur dan Memori', 'Dunning-Kruger Effect', 'Bahasa Punah'. " +
         `PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.${excludeClause}`;
     } else {
       prompt =
         "Kamu adalah generator topik untuk latihan bicara spontan (impromptu speaking). " +
         `Kategori: ${label}. ` +
         "Berikan tepat 1 topik acak yang cocok untuk latihan bicara spontan dalam kategori tersebut. " +
-        "Topik harus 1-2 kata saja dalam Bahasa Indonesia. " +
+        "Topik harus 1-2 kata. Gunakan Bahasa Indonesia jika ada padanan yang lazim, " +
+        "tapi jangan terjemahkan paksa istilah yang memang lebih dikenal dalam bahasa aslinya. " +
         `PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.${excludeClause}`;
     }
 

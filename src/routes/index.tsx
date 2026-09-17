@@ -266,7 +266,7 @@ const SPINNER_POOL = [
       const m = overrideMode ?? mode;
       const c = overrideCategory ?? category;
       const query = m === "research" ? "riset" : c;
-      const data = await generateTopic({ data: { cat: query, exclude: history.slice(0, 8) } });
+      const data = await generateTopic({ data: { cat: query, exclude: history.slice(0, 3) } });
       if (data && data.status === "success" && data.topic && data.topic.trim()) {
         return data.topic;
       }
