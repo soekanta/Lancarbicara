@@ -36,7 +36,7 @@ export const generateTopic = createServerFn({ method: "POST" })
     const isRiset = cat === "riset";
     const excludeClause =
       exclude.length > 0
-        ? ` Jangan gunakan topik-topik berikut yang sudah pernah dipakai: ${exclude.join(", ")}.`
+        ? ` Hindari topik yang sama atau terlalu mirip tema dengan topik-topik berikut yang sudah baru dipakai: ${exclude.join(", ")}.`
         : "";
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -54,23 +54,38 @@ export const generateTopic = createServerFn({ method: "POST" })
     let prompt: string;
     if (isRiset) {
       prompt =
-        "Kamu adalah generator topik untuk latihan presentasi. " +
-        "Berikan tepat 1 topik menarik yang cocok untuk dipresentasikan oleh orang umum setelah riset singkat. " +
-        "Topik harus 1-4 kata. Gunakan Bahasa Indonesia jika ada padanan yang lazim, " +
-        "tapi jangan terjemahkan paksa istilah asing yang memang lebih dikenal dalam bahasa aslinya (contoh: tetap tulis 'Dunning-Kruger Effect', bukan 'Efek Mandor Bodoh'). " +
-        "Topik boleh dari bidang apa saja (sains, sosial, teknologi, budaya, bisnis, sejarah, dll) " +
-        "tapi harus mudah dipahami audiens umum dan relevan dengan kehidupan nyata. " +
-        "Hindari topik yang terlalu teknis, terlalu niche, atau hanya dikenal kalangan akademisi spesialis. " +
-        "Contoh topik yang bagus: 'Efek Placebo', 'Ekonomi Perhatian', 'Tidur dan Memori', 'Dunning-Kruger Effect', 'Bahasa Punah'. " +
-        `PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.${excludeClause}`;
+        "Kamu adalah generator topik latihan presentasi untuk orang awam.\n\n" +
+        "Tugas: Berikan TEPAT 1 topik saja.\n\n" +
+        "Aturan ketat:\n" +
+        "- Panjang: 1 sampai 4 kata.\n" +
+        "- Bahasa: Gunakan Bahasa Indonesia jika ada padanan yang lazim dipakai orang awam. JANGAN terjemahkan paksa istilah asing yang sudah lebih dikenal dalam bahasa aslinya (contoh benar: \"Dunning-Kruger Effect\", \"Placebo Effect\", \"Confirmation Bias\". Contoh salah: \"Efek Mandor Bodoh\").\n" +
+        "- Tingkat kesulitan: Cocok untuk dipresentasikan setelah riset singkat 10–20 menit. Harus mudah dipahami audiens umum, relevan dengan kehidupan nyata, dan punya sudut pandang menarik.\n" +
+        "- Bidang boleh apa saja (sains, psikologi, teknologi, budaya, bisnis, sejarah, kesehatan, dll), TAPI hindari:\n" +
+        "  • Topik terlalu teknis/niche/akademis\n" +
+        "  • Jargon spesialis\n" +
+        "  • Judul yang terdengar seperti paper ilmiah\n" +
+        "  • Konsep yang terlalu abstrak atau butuh data kompleks\n\n" +
+        "Contoh bagus:\n" +
+        "- Efek Placebo\n- Ekonomi Perhatian\n- Tidur dan Memori\n- Dunning-Kruger Effect\n- Bahasa Punah\n- Bias Konfirmasi\n- Efek Bystander\n\n" +
+        "Contoh jelek (JANGAN buat seperti ini):\n" +
+        "- Biomimikri Arsitektur Regeneratif\n- Kriptobiosis Tardigrada\n- Epistemologi Postmodern\n- Teori String\n\n" +
+        `PENTING KERAS:\nBalas HANYA dengan teks topiknya saja.\nTanpa tanda kutip, tanpa nomor, tanpa penjelasan, tanpa titik di akhir, tanpa kata tambahan apa pun.${excludeClause}`;
     } else {
       prompt =
-        "Kamu adalah generator topik untuk latihan bicara spontan (impromptu speaking). " +
-        `Kategori: ${label}. ` +
-        "Berikan tepat 1 topik acak yang cocok untuk latihan bicara spontan dalam kategori tersebut. " +
-        "Topik harus 1-2 kata. Gunakan Bahasa Indonesia jika ada padanan yang lazim, " +
-        "tapi jangan terjemahkan paksa istilah yang memang lebih dikenal dalam bahasa aslinya. " +
-        `PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.${excludeClause}`;
+        "Kamu adalah generator topik latihan bicara spontan (impromptu speaking).\n\n" +
+        `Kategori yang diminta: ${label}\n\n` +
+        "Tugas: Berikan TEPAT 1 topik acak yang cocok untuk dibicarakan secara spontan (1–2 menit) dalam kategori di atas.\n\n" +
+        "Aturan ketat:\n" +
+        "- Panjang: 1 atau 2 kata saja.\n" +
+        "- Harus konkret, mudah dibayangkan, dan bisa dibicarakan tanpa riset.\n" +
+        "- Gunakan Bahasa Indonesia jika ada padanan yang lazim. Jangan terjemahkan paksa istilah yang lebih dikenal dalam bahasa aslinya.\n" +
+        "- JANGAN menggabungkan dua konsep berbeda menjadi satu topik (contoh jelek: \"Hobi Makanan\", \"Kebiasaan Pagi\", \"Teknologi Masa Depan\").\n" +
+        "- Hindari topik yang terlalu abstrak, filosofis, atau membutuhkan pengetahuan khusus.\n\n" +
+        "Contoh bagus (tergantung kategori):\n" +
+        "- Kopi\n- Macet\n- Hujan\n- Smartphone\n- Tidur Siang\n- Antrian\n- Dompet\n\n" +
+        "Contoh jelek (JANGAN buat seperti ini):\n" +
+        "- Hobi Makanan\n- Kebiasaan Pagi\n- Dampak Media Sosial\n- Filosofi Hidup\n\n" +
+        `PENTING KERAS:\nBalas HANYA dengan teks topiknya saja.\nTanpa tanda kutip, tanpa nomor, tanpa penjelasan, tanpa titik di akhir, tanpa kata tambahan apa pun.${excludeClause}`;
     }
 
     const payload = JSON.stringify({
