@@ -34,9 +34,9 @@ export const generateTopic = createServerFn({ method: "POST" })
     const cat = data.cat;
     const exclude = data.exclude ?? [];
     const isRiset = cat === "riset";
-    const excludeClause =
+    const recentTopicsBlock =
       exclude.length > 0
-        ? ` Hindari topik yang sama atau terlalu mirip tema dengan topik-topik berikut yang sudah baru dipakai: ${exclude.join(", ")}.`
+        ? `Topik yang SUDAH PERNAH muncul baru-baru ini (JANGAN ulangi atau buat yang mirip tema):\n${exclude.join(", ")}\n\n`
         : "";
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -55,7 +55,8 @@ export const generateTopic = createServerFn({ method: "POST" })
     if (isRiset) {
       prompt =
         "Kamu adalah generator topik latihan presentasi untuk orang awam.\n\n" +
-        "Tugas: Berikan TEPAT 1 topik saja.\n\n" +
+        recentTopicsBlock +
+        "Tugas: Berikan TEPAT 1 topik baru yang sangat berbeda dari daftar di atas (jika ada).\n\n" +
         "Aturan ketat:\n" +
         "- Panjang: 1 sampai 4 kata.\n" +
         "- Bahasa: Gunakan Bahasa Indonesia jika ada padanan yang lazim dipakai orang awam. JANGAN terjemahkan paksa istilah asing yang sudah lebih dikenal dalam bahasa aslinya (contoh benar: \"Dunning-Kruger Effect\", \"Placebo Effect\", \"Confirmation Bias\". Contoh salah: \"Efek Mandor Bodoh\").\n" +
@@ -69,12 +70,13 @@ export const generateTopic = createServerFn({ method: "POST" })
         "- Efek Placebo\n- Ekonomi Perhatian\n- Tidur dan Memori\n- Dunning-Kruger Effect\n- Bahasa Punah\n- Bias Konfirmasi\n- Efek Bystander\n\n" +
         "Contoh jelek (JANGAN buat seperti ini):\n" +
         "- Biomimikri Arsitektur Regeneratif\n- Kriptobiosis Tardigrada\n- Epistemologi Postmodern\n- Teori String\n\n" +
-        `PENTING KERAS:\nBalas HANYA dengan teks topiknya saja.\nTanpa tanda kutip, tanpa nomor, tanpa penjelasan, tanpa titik di akhir, tanpa kata tambahan apa pun.${excludeClause}`;
+        "PENTING KERAS:\nBalas HANYA dengan teks topiknya saja.\nTanpa tanda kutip, tanpa nomor, tanpa penjelasan, tanpa titik di akhir, tanpa kata tambahan apa pun.";
     } else {
       prompt =
         "Kamu adalah generator topik latihan bicara spontan (impromptu speaking).\n\n" +
         `Kategori yang diminta: ${label}\n\n` +
-        "Tugas: Berikan TEPAT 1 topik acak yang cocok untuk dibicarakan secara spontan (1–2 menit) dalam kategori di atas.\n\n" +
+        recentTopicsBlock +
+        "Tugas: Berikan TEPAT 1 topik baru yang sangat berbeda dari daftar di atas (jika ada).\n\n" +
         "Aturan ketat:\n" +
         "- Panjang: 1 atau 2 kata saja.\n" +
         "- Harus konkret, mudah dibayangkan, dan bisa dibicarakan tanpa riset.\n" +
@@ -85,7 +87,7 @@ export const generateTopic = createServerFn({ method: "POST" })
         "- Kopi\n- Macet\n- Hujan\n- Smartphone\n- Tidur Siang\n- Antrian\n- Dompet\n\n" +
         "Contoh jelek (JANGAN buat seperti ini):\n" +
         "- Hobi Makanan\n- Kebiasaan Pagi\n- Dampak Media Sosial\n- Filosofi Hidup\n\n" +
-        `PENTING KERAS:\nBalas HANYA dengan teks topiknya saja.\nTanpa tanda kutip, tanpa nomor, tanpa penjelasan, tanpa titik di akhir, tanpa kata tambahan apa pun.${excludeClause}`;
+        "PENTING KERAS:\nBalas HANYA dengan teks topiknya saja.\nTanpa tanda kutip, tanpa nomor, tanpa penjelasan, tanpa titik di akhir, tanpa kata tambahan apa pun.";
     }
 
     const payload = JSON.stringify({
