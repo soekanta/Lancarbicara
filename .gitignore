@@ -1,4 +1,7 @@
 # Logs
+# Folder referensi lokal (tidak perlu di-push)
+coba/
+
 logs
 *.log
 npm-debug.log*

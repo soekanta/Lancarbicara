@@ -77,15 +77,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { name: "viewport", content: "width=device-width, initial-scale=1.0, viewport-fit=cover" },
+      { name: "theme-color", content: "#f8fafc" },
+      { name: "color-scheme", content: "light" },
+      { title: "LancarBicara — Latihan Bicara Spontan & Presentasi" },
+      { name: "description", content: "Generator topik latihan bicara spontan dan presentasi. Dapatkan topik acak untuk impromptu speaking dan riset singkat." },
+      { property: "og:title", content: "LancarBicara — Latihan Bicara Spontan & Presentasi" },
+      { property: "og:description", content: "Generator topik latihan bicara spontan dan presentasi. Dapatkan topik acak untuk impromptu speaking dan riset singkat." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -106,6 +106,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
     ],
   }),
   shellComponent: RootShell,
@@ -116,7 +118,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="id">
       <head>
         <HeadContent />
       </head>

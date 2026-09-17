@@ -142,9 +142,43 @@
     border-color: var(--color-border);
   }
 
+  html {
+    /* Support svh (small viewport height) untuk address bar mobile */
+    height: 100%;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    /* Ketajaman teks lebih baik di semua OS */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-synthesis: none;
+    /* Padding safe area untuk iPhone notch / Dynamic Island / home bar */
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    min-height: 100svh;
+  }
+
+  /* Custom scrollbar — tipis dan subtle */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(from var(--primary) l c h / 25%) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: oklch(from var(--primary) l c h / 25%);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(from var(--primary) l c h / 45%);
   }
 }
 
@@ -264,3 +298,13 @@
   transform: rotate(180deg);
 }
 
+/* Aksesibilitas: matikan animasi jika user prefer reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

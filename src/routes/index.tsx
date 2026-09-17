@@ -12,6 +12,8 @@ import { RecordingPanel } from "@/components/RecordingPanel";
 import { CategorySelect } from "@/components/CategorySelect";
 import { SlotSpinner } from "@/components/SlotSpinner";
 import { generateTopic } from "@/lib/generate-topic";
+import { ShuffleBag } from "@/lib/topic-bag";
+import { TOPIC_POOLS } from "@/data/topic-pools";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -165,6 +167,9 @@ function Index() {
   const stageRef = useRef<Stage>("idle");
   stageRef.current = stage;
 
+  // Satu ShuffleBag per kategori — dibuat lazy saat pertama kali dibutuhkan
+  const bagsRef = useRef<Partial<Record<string, ShuffleBag>>>({});
+
   const recorder = useRecorder();
 
   const handleComplete = useCallback(() => {
@@ -262,11 +267,23 @@ const SPINNER_POOL = [
   }, [hydrated]);
 
   async function fetchTopic(overrideMode?: Mode, overrideCategory?: Category): Promise<string> {
+    const m = overrideMode ?? mode;
+    const c = overrideCategory ?? category;
+
+    // Mode Spontan — pakai ShuffleBag lokal, tidak perlu Gemini
+    if (m === "impromptu") {
+      const pool = TOPIC_POOLS[c];
+      if (pool && pool.length > 0) {
+        if (!bagsRef.current[c]) {
+          bagsRef.current[c] = new ShuffleBag(pool);
+        }
+        return bagsRef.current[c]!.next();
+      }
+    }
+
+    // Mode Riset — tetap pakai Gemini
     try {
-      const m = overrideMode ?? mode;
-      const c = overrideCategory ?? category;
-      const query = m === "research" ? "riset" : c;
-      const data = await generateTopic({ data: { cat: query, exclude: history.slice(0, 5) } });
+      const data = await generateTopic({ data: { cat: "riset", exclude: history.slice(0, 5) } });
       if (data && data.status === "success" && data.topic && data.topic.trim()) {
         return data.topic;
       }
