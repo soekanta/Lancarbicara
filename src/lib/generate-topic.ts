@@ -46,11 +46,13 @@ export const generateTopic = createServerFn({ method: "GET" })
     let prompt: string;
     if (isRiset) {
       prompt =
-        "Kamu adalah generator topik untuk latihan presentasi mendalam. " +
-        "Berikan tepat 1 topik unik dan menarik untuk latihan presentasi riset. " +
-        "Topik harus 1-4 kata, berupa konsep, teori, fenomena, atau ide menarik dari berbagai bidang ilmu. " +
-        "Topik harus belum terlalu mainstream dan mendorong eksplorasi mendalam. " +
-        "Gunakan Bahasa Indonesia (boleh campur istilah asing jika memang lazim). " +
+        "Kamu adalah generator topik untuk latihan presentasi. " +
+        "Berikan tepat 1 topik menarik yang cocok untuk dipresentasikan oleh orang umum setelah riset singkat. " +
+        "Topik harus 1-4 kata dalam Bahasa Indonesia. " +
+        "Topik boleh dari bidang apa saja (sains, sosial, teknologi, budaya, bisnis, sejarah, dll) " +
+        "tapi harus mudah dipahami audiens umum dan relevan dengan kehidupan nyata. " +
+        "Hindari topik yang terlalu teknis, terlalu niche, atau hanya dikenal kalangan akademisi spesialis. " +
+        "Contoh topik yang bagus: 'Efek Placebo', 'Ekonomi Perhatian', 'Tidur dan Memori', 'Efek Dunning-Kruger', 'Bahasa Punah'. " +
         "PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.";
     } else {
       prompt =
