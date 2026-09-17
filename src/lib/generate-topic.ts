@@ -22,7 +22,7 @@ const categoryLabels: Record<string, string> = {
 // ============================================================
 // SERVER FUNCTION — dipanggil dari browser, dijalankan di server
 // ============================================================
-export const generateTopic = createServerFn({ method: "GET" })
+export const generateTopic = createServerFn({ method: "POST" })
   .validator((input: unknown) => {
     const data = input as { cat?: string };
     return { cat: typeof data?.cat === "string" ? data.cat : "umum" };
