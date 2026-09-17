@@ -24,12 +24,20 @@ const categoryLabels: Record<string, string> = {
 // ============================================================
 export const generateTopic = createServerFn({ method: "POST" })
   .validator((input: unknown) => {
-    const data = input as { cat?: string };
-    return { cat: typeof data?.cat === "string" ? data.cat : "umum" };
+    const data = input as { cat?: string; exclude?: string[] };
+    return {
+      cat: typeof data?.cat === "string" ? data.cat : "umum",
+      exclude: Array.isArray(data?.exclude) ? (data.exclude as string[]).slice(0, 8) : [],
+    };
   })
   .handler(async ({ data }) => {
     const cat = data.cat;
+    const exclude = data.exclude ?? [];
     const isRiset = cat === "riset";
+    const excludeClause =
+      exclude.length > 0
+        ? ` Jangan gunakan topik-topik berikut yang sudah pernah dipakai: ${exclude.join(", ")}.`
+        : "";
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -53,14 +61,14 @@ export const generateTopic = createServerFn({ method: "POST" })
         "tapi harus mudah dipahami audiens umum dan relevan dengan kehidupan nyata. " +
         "Hindari topik yang terlalu teknis, terlalu niche, atau hanya dikenal kalangan akademisi spesialis. " +
         "Contoh topik yang bagus: 'Efek Placebo', 'Ekonomi Perhatian', 'Tidur dan Memori', 'Efek Dunning-Kruger', 'Bahasa Punah'. " +
-        "PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.";
+        `PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.${excludeClause}`;
     } else {
       prompt =
         "Kamu adalah generator topik untuk latihan bicara spontan (impromptu speaking). " +
         `Kategori: ${label}. ` +
         "Berikan tepat 1 topik acak yang cocok untuk latihan bicara spontan dalam kategori tersebut. " +
         "Topik harus 1-2 kata saja dalam Bahasa Indonesia. " +
-        "PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.";
+        `PENTING: Balas HANYA dengan teks topiknya saja, tanpa tanda kutip, tanpa penjelasan.${excludeClause}`;
     }
 
     const payload = JSON.stringify({

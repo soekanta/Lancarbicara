@@ -266,7 +266,7 @@ const SPINNER_POOL = [
       const m = overrideMode ?? mode;
       const c = overrideCategory ?? category;
       const query = m === "research" ? "riset" : c;
-      const data = await generateTopic({ data: { cat: query } });
+      const data = await generateTopic({ data: { cat: query, exclude: history.slice(0, 8) } });
       if (data && data.status === "success" && data.topic && data.topic.trim()) {
         return data.topic;
       }
@@ -311,7 +311,7 @@ const SPINNER_POOL = [
     setHasSpun(true);
     playSpinReveal();
     if (!next.includes("sibuk") && !next.includes("Gagal") && !next.includes("API")) {
-      setHistory((h) => [next, ...h.filter((t) => t !== next)].slice(0, 8));
+      setHistory((h) => [next, ...h.filter((t) => t.toLowerCase() !== next.toLowerCase())].slice(0, 8));
     }
     setIsLoading(false);
     setSpinResult(null);
